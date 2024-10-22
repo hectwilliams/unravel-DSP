@@ -20,28 +20,10 @@ c1 = m1_analysis * h1
 c1_dot = np.dot(m1_analysis, h1) 
 c0_dot = np.dot(m0_analysis, h1) 
 
-print(c0_dot.__abs__(), c1_dot.__abs__())
-
-# c1_dot_mag = np.abs(c1_dot)
-
 m1_analysis = np.exp(1j * C_2PI * 1 * np.divide(1, C_N) * C_RANGE)
 ax1.scatter(C_RANGE, h1[C_RANGE], color='gray', alpha=0.5)
 ax1.scatter(C_RANGE, c0[C_RANGE], color='yellow', s=0.5)
 ax2.scatter(C_RANGE, h1[C_RANGE], color='gray', alpha=0.5)
 ax2.scatter(C_RANGE, c1[C_RANGE], color='yellow', s=0.5)
-# ax2.plot(C_RANGE, m1_analysis.real[C_RANGE], linestyle='dotted', color='black', linewidth=0.5)
-# ax2.plot(C_RANGE, m1_analysis.imag[C_RANGE], linestyle = 'dashed', color='black', linewidth=0.5)
-
-# ax1.scatter(C_RANGE, m1_analysis[C_RANGE], color='red', alpha=0.5)
-
-# ax1.vlines(C_RANGE, np.zeros(shape=C_RANGE.size), m1_analysis[C_RANGE], linewidth=0.5)
 ax3.vlines(C_UNIQUE_RANGE, np.zeros(shape=C_UNIQUE_RANGE.size), h1_fft_mag[C_UNIQUE_RANGE])
 plt.show()
-
-"""
-
-[0.         0.03806023 0.14644661 0.30865828 0.5        0.69134172
- 0.85355339 0.96193977 1.         0.96193977 0.85355339 0.69134172
- 0.5        0.30865828 0.14644661 0.03806023]
-
- """
