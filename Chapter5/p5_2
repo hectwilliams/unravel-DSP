@@ -1,0 +1,80 @@
+
+import matplotlib.pyplot as plt 
+import numpy as np 
+
+C_2PI = 2 * np.pi
+C_FS = 1000
+C_TS = np.divide(1, C_FS)
+ACQ_TIME = 1
+C_N = np.int32( np.floor(   np.divide(ACQ_TIME, C_TS)   )   )
+C_N_FOLD = np.floor_divide(C_N, 2)
+C_RANGE_PER_SECOND =  np.arange(0, C_N) 
+C_F0 = 800
+C_FS_ANALYSIS =  np.divide(C_FS , C_N).round(4)
+
+if __name__ == '__main__':
+    fig = plt.figure()
+    ax1 = fig.add_subplot(4,1,1)
+    ax2 = fig.add_subplot(4,1,2)
+    ax3 = fig.add_subplot(4,1,3)
+    ax4 = fig.add_subplot(4,1,4)
+
+    # input signal
+    x_in = np.cos(C_2PI * C_F0 * C_TS * C_RANGE_PER_SECOND) 
+    
+    # A/D fs = 1000 Hz
+    x_in_fft = np.fft.fft(x_in)
+    x_in_fft_abs = x_in_fft.__abs__()
+    f_n = np.arange(0, 1, 1/C_N ) * C_FS
+    
+    # Views 
+    ax1.scatter( f_n , x_in_fft_abs, s=3)    
+    ax1.plot( f_n , x_in_fft_abs, linewidth=2)
+    ax1.set_title(f' X_IN SPECTRUM   RANGE = [0 - FS]   FS_ANALYSIS = {C_FS_ANALYSIS}', fontsize=5)    
+    ax1.tick_params(axis='x', labelsize=6)
+    # Mark tone 
+    indices_tones, = np.nonzero(x_in_fft > 300)
+    # Mark alias
+    y = x_in_fft_abs[indices_tones[0]]
+    x = indices_tones[0]
+    arrow_pos = (x, y)
+    ax1.annotate('alias', xycoords='data', fontsize=6, textcoords='offset points', xy=arrow_pos, xytext=(-10,-20), arrowprops=dict(facecolor='black', width=0.5, headwidth=2, shrink=0.05) , ha='right', va='bottom')
+    # Mark signal
+    y = x_in_fft_abs[indices_tones[1]]
+    x = indices_tones[1]
+    arrow_pos = (x, y)
+    ax1.annotate('signal', xycoords='data', fontsize=6,textcoords='offset points', xy=arrow_pos, xytext=(-10,-20), arrowprops=dict(facecolor='black', width=0.5, headwidth=2, shrink=0.05) , ha='right', va='bottom')
+    
+    # Construct Digital Filter 
+    """
+        x1, y1 = 399, 1
+        y2 ,y2 = 419, 0
+        m = (y1 - y2) / (x1 - x2)
+    """
+    passband = np.ones(shape=400)
+    transband = np.array(list(map(lambda x: -0.05*x + 20.95, np.arange(400, 420))))
+    stopband = np.zeros(shape= C_N- 420)
+    fir_fft = np.hstack( (passband, transband, stopband))
+    fir_rev = fir_fft[::-1]
+    # view filter
+    ax2.plot(f_n, fir_fft)
+    ax2.tick_params(axis='x', labelsize=6)
+    ax2.set_title(f'FIR FILTER FREQ RESPONSE', fontsize=5)    
+    ax2.tick_params(axis='x', labelsize=6)
+    # Multiply filter and signal spectrums
+    signal_filtered_fft = fir_fft * x_in_fft
+    ax3.plot(signal_filtered_fft)
+    ax3.set_title(f'  X_IN_SPECTRUM  *  FIR_FILTER_SPECTRUM ', fontsize=5)    
+    ax3.tick_params(axis='x', labelsize=6)
+    signal_filtered = np.fft.ifft(signal_filtered_fft)
+    # Tone(s) recovered  - single 'alias' tone recovered in this example 
+    # find max index
+    m = np.argmax(signal_filtered_fft)
+    freq_m = m * C_FS_ANALYSIS
+    # freq_m can be recovered after filtering, view siingle cycle of waveform
+    cycles_per_sample = np.divide(freq_m, C_FS)
+    samples_per_second = np.int32(np.ceil(np.divide(1, cycles_per_sample)))
+    ax4.tick_params(axis='x', labelsize=6)
+    ax4.plot(signal_filtered[:samples_per_second] )
+    ax4.set_title(f'Single cycle of aliased data', fontsize=5)    
+    plt.show() 
