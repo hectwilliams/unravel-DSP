@@ -1,0 +1,23 @@
+"""Determine which filter is an IIR or an FIR"""
+import matplotlib.pyplot as plt 
+import numpy as np 
+
+omega = np.linspace(-np.pi, np.pi)
+H1 = (1 + np.exp(-1j * 3 * omega) ) / (1 + np.exp(-1j  * omega) )
+H2 = (1 - np.exp(-1j * 3 * omega) ) / (1 + np.exp(-1j  * omega) )
+
+fig = plt.figure()
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(2,2,2)
+ax3 = fig.add_subplot(2,2,3)
+ax4 = fig.add_subplot(2,2,4)
+ax1.plot(omega, H1.__abs__())
+ax1.set_title('Filter H1', fontsize=6)
+ax3.plot(omega, np.angle(H1))
+ax3.set_title('PHase H1', fontsize=6)
+ax2.plot(omega, H2.__abs__())
+ax2.set_title('Filter H2', fontsize=6)
+ax4.plot(omega, np.angle(H2))
+ax4.set_title('Phase H2', fontsize=6)
+plt.show() 
+
